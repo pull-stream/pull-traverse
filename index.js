@@ -13,15 +13,27 @@ function (value) {
 
 var depthFirst = exports.depthFirst =
 function (start, createStream) {
-  var reads = []
+  var reads = [], ended
 
   reads.unshift(once(start))
 
   return function next (end, cb) {
     if(!reads.length)
       return cb(true)
+    if(ended)
+      return cb(ended)
+
     reads[0](end, function (end, data) {
       if(end) {
+        if(end !== true) {
+          ended = end
+          reads.shift()
+
+          while(reads.length)
+            reads.shift()(end, function () {})
+          
+          cb(end)
+        }
         //if this stream has ended, go to the next queue
         reads.shift()
         return next(null, cb)
