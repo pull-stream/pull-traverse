@@ -32,7 +32,7 @@ function (start, createStream) {
           while(reads.length)
             reads.shift()(end, function () {})
           
-          cb(end)
+          return cb(end)
         }
         //if this stream has ended, go to the next queue
         reads.shift()
